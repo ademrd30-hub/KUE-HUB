@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KUE Communication Hub</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root{
+    --bg:var(--tg-theme-bg-color,#ffffff); --fg:var(--tg-theme-text-color,#1a1a1a);
+    --hint:var(--tg-theme-hint-color,#6b7280); --link:var(--tg-theme-link-color,#2563eb);
+    --btn:var(--tg-theme-button-color,#2563eb); --btnfg:var(--tg-theme-button-text-color,#ffffff);
+    --card:var(--tg-theme-secondary-bg-color,#f3f4f6); --line:rgba(128,128,128,.28);
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg);color:var(--fg);font:16px/1.45 system-ui,"Noto Sans Ethiopic","Nyala",sans-serif;padding:12px 14px 96px}
+  h1{font-size:19px;margin:0} h2{font-size:17px;margin:18px 0 8px}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .lang button{border:1px solid var(--line);background:none;color:var(--fg);padding:5px 10px;border-radius:8px}
+  .lang button.on{background:var(--btn);color:var(--btnfg);border-color:var(--btn)}
+  .group{color:var(--hint);font-size:13px;text-transform:uppercase;letter-spacing:.04em;margin:16px 0 6px}
+  .card{display:block;width:100%;text-align:left;background:var(--card);color:var(--fg);border:1px solid transparent;
+        border-radius:12px;padding:14px;margin-bottom:8px;font-size:16px}
+  .card[disabled]{opacity:.45} .card small{display:block;color:var(--hint);margin-top:2px}
+  label{display:block;font-weight:600;margin:12px 0 4px}
+  label .req{color:#dc2626}
+  input[type=text],input[type=date],input[type=time],select,textarea{width:100%;padding:11px;border-radius:10px;
+        border:1px solid var(--line);background:var(--bg);color:var(--fg);font:inherit}
+  textarea{min-height:110px;resize:vertical}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{flex:1 1 30%;border:2px solid var(--line);border-radius:12px;padding:10px 8px;text-align:center;background:none;color:var(--fg);font-size:15px}
+  .chip.on{border-color:var(--btn);background:var(--card)}
+  .chip small{display:block;color:var(--hint);font-size:12px;margin-top:2px}
+  .p-urgent.on{border-color:#dc2626} .p-today.on{border-color:#f59e0b} .p-info.on{border-color:#16a34a}
+  .check{display:flex;align-items:center;gap:10px;padding:9px 0;font-weight:400;margin:0}
+  .check input{width:22px;height:22px}
+  .bar{position:fixed;left:0;right:0;bottom:0;display:flex;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));
+       background:var(--bg);border-top:1px solid var(--line)}
+  .bar button{flex:1;padding:14px;border-radius:12px;border:none;font-size:16px;font-weight:600}
+  .bar .pri{background:var(--btn);color:var(--btnfg)} .bar .sec{background:var(--card);color:var(--fg)}
+  .bar button[disabled]{opacity:.4}
+  .preview{background:var(--card);border-radius:12px;padding:14px;white-space:pre-wrap;word-break:break-word}
+  .meta{color:var(--hint);font-size:13px;margin-top:8px}
+  .err{color:#dc2626;font-size:14px;margin-top:8px} .ok{color:#16a34a}
+  pre{white-space:pre-wrap;word-break:break-all;font-size:12px;background:var(--card);padding:10px;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="top"><h1 id="title">…</h1>
+  <div class="lang"><button id="l-en">EN</button> <button id="l-am">አማ</button></div></div>
+<div id="app"></div>
+<div class="bar" id="bar"></div>
+
+<script>
+const tg = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) ? window.Telegram.WebApp : null;   // null = opened in a normal browser (test mode)
+if (tg) { tg.ready(); tg.expand(); }
+const P = new URLSearchParams(location.search);
+const guessLang = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user && tg.initDataUnsafe.user.language_code === 'am') ? 'am' : 'en';
+const me = { lang: P.get('lang') || guessLang, role: P.get('role') || 'staff', college: P.get('college') || '',
+             dept: P.get('dept') || '', bc: P.get('bc') === '1', all: P.get('all') === '1' };
+let CFG, lang = me.lang;
+let st = { step: 1, tpl: null, dir: null, fields: {}, prio: 'today', scope: 'dept', college: me.college, dept: me.dept, roles: [], err: '' };
+const MAX_BYTES = 3900;
+
+const L = o => (o && (o[lang] || o.en)) || '';
+const ui = k => L(CFG.ui[k]);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const level = r => (CFG.roles.find(x => x.id === r) || {}).level || 9;
+const myLevel = () => level(me.role);
+const tplById = id => CFG.templates.find(t => t.id === id);
+const direction = () => { const t = tplById(st.tpl); return t.direction === 'any' ? st.dir : t.direction; };
+
+fetch('config.json').then(r => r.json()).then(c => {
+  CFG = c;
+  if (!st.college) st.college = CFG.units[0].id;
+  if (!st.dept) st.dept = (CFG.units.find(u => u.id === st.college) || CFG.units[0]).depts[0].id;
+  draw();
+});
+
+function canUse(t) {            // UI only hides things; the bot enforces the real rules
+  if (t.direction === 'down') return me.bc;
+  if (t.direction === 'up') return myLevel() > 1;
+  return true;
+}
+
+/* ---------- payload ---------- */
+function payload() {
+  const t = tplById(st.tpl), dir = direction();
+  const p = { template: st.tpl, fields: st.fields };
+  if (t.direction === 'any') p.direction = dir;
+  if (dir === 'forum') { p.priority = 'info'; return p; }
+  p.priority = st.prio; p.roles = st.roles;
+  if (dir === 'down') { p.scope = st.scope; p.college = st.college; p.dept = st.dept; }
+  return p;
+}
+const bytes = () => new TextEncoder().encode(JSON.stringify(payload())).length;
+
+/* ---------- screens ---------- */
+function draw() {
+  document.documentElement.lang = lang;
+  document.getElementById('title').textContent = ui('app_title');
+  document.getElementById('l-en').className = lang === 'en' ? 'on' : '';
+  document.getElementById('l-am').className = lang === 'am' ? 'on' : '';
+  const app = document.getElementById('app'), bar = document.getElementById('bar');
+  if (st.step === 1) { app.innerHTML = screenPick(); bar.innerHTML = ''; }
+  else if (st.step === 2) { app.innerHTML = screenForm(); bar.innerHTML = navBar(false); }
+  else if (st.step === 3) { app.innerHTML = screenAudience(); bar.innerHTML = navBar(false); }
+  else { app.innerHTML = screenPreview(); bar.innerHTML = navBar(true); }
+}
+
+function navBar(last) {
+  const over = last && bytes() > MAX_BYTES;
+  return `<button class="sec" data-act="back">${ui('back')}</button>
+          <button class="pri" data-act="${last ? 'send' : 'next'}" ${over ? 'disabled' : ''}>${last ? ui('send') : ui('next')}</button>`;
+}
+
+function screenPick() {
+  let h = `<h2>${ui('pick')}</h2>`;
+  for (const g of ['down', 'up', 'letter', 'forum']) {
+    const items = CFG.templates.filter(t => t.group === g);
+    if (!items.length) continue;
+    h += `<div class="group">${ui('group_' + g)}</div>`;
+    for (const t of items) {
+      const ok = canUse(t);
+      h += `<button class="card" data-tpl="${t.id}" ${ok ? '' : 'disabled'}>${esc(L(t.name))}${ok ? '' : `<small>${ui('no_perm')}</small>`}</button>`;
+    }
+  }
+  return h;
+}
+
+function field(f) {
+  const v = st.fields[f.id] || '';
+  const lab = `<label>${esc(L(f))}${f.required ? ' <span class="req">*</span>' : ''}</label>`;
+  const a = `data-f="${f.id}"`;
+  if (f.type === 'textarea') return lab + `<textarea ${a} maxlength="${f.max || 1200}">${esc(v)}</textarea>`;
+  if (f.type === 'select') return lab + `<select ${a}><option value=""></option>` +
+      f.options.map(o => `<option value="${o.id}" ${v === o.id ? 'selected' : ''}>${esc(L(o))}</option>`).join('') + `</select>`;
+  if (f.type === 'checkbox') return `<label class="check"><input type="checkbox" ${a} ${v ? 'checked' : ''}> ${esc(L(f))}</label>`;
+  return lab + `<input type="${f.type}" ${a} value="${esc(v)}" maxlength="${f.max || 200}">`;
+}
+
+function screenForm() {
+  const t = tplById(st.tpl);
+  let h = `<h2>${esc(L(t.name))}</h2>`;
+  if (t.direction === 'any') {
+    h += `<label>${ui('direction')}</label><div class="row">
+      <button class="chip ${st.dir === 'up' ? 'on' : ''}" data-dir="up" ${myLevel() > 1 ? '' : 'disabled'}>${ui('dir_up')}</button>
+      <button class="chip ${st.dir === 'down' ? 'on' : ''}" data-dir="down" ${me.bc ? '' : 'disabled'}>${ui('dir_down')}</button></div>`;
+  }
+  h += t.fields.map(field).join('');
+  h += `<div class="meta">${ui('attach_note')}</div>`;
+  if (st.err) h += `<div class="err">${esc(st.err)}</div>`;
+  return h;
+}
+
+function screenAudience() {
+  const dir = direction();
+  let h = `<h2>${ui('audience')}</h2>`;
+  if (dir === 'down') {
+    const lvl = myLevel();
+    const scopes = [['all', me.all], ['college', me.all || (me.bc && lvl <= 2)], ['dept', me.bc]];
+    h += `<label>${ui('scope')}</label><div class="row">` + scopes.map(([k, ok]) =>
+      `<button class="chip ${st.scope === k ? 'on' : ''}" data-scope="${k}" ${ok ? '' : 'disabled'}>${ui('scope_' + k)}</button>`).join('') + `</div>`;
+    if (st.scope !== 'all') {
+      const lockCollege = !me.all;
+      h += `<label>${ui('college')}</label><select data-college ${lockCollege ? 'disabled' : ''}>` +
+        CFG.units.map(u => `<option value="${u.id}" ${st.college === u.id ? 'selected' : ''}>${esc(L(u))}</option>`).join('') + `</select>`;
+    }
+    if (st.scope === 'dept') {
+      const unit = CFG.units.find(u => u.id === st.college) || CFG.units[0];
+      const lockDept = !me.all && lvl >= 3;
+      h += `<label>${ui('dept')}</label><select data-dept ${lockDept ? 'disabled' : ''}>` +
+        unit.depts.map(d => `<option value="${d.id}" ${st.dept === d.id ? 'selected' : ''}>${esc(L(d))}</option>`).join('') + `</select>`;
+    }
+  }
+  const roles = CFG.roles.filter(r => dir === 'down' ? true : r.level < myLevel());
+  h += `<label>${ui('roles')}</label>` + roles.map(r =>
+    `<label class="check"><input type="checkbox" data-role="${r.id}" ${st.roles.includes(r.id) ? 'checked' : ''}> ${esc(L(r))}</label>`).join('');
+  if (dir !== 'forum') {
+    h += `<label>${ui('priority')}</label><div class="row">` + ['urgent', 'today', 'info'].map(p =>
+      `<button class="chip p-${p} ${st.prio === p ? 'on' : ''}" data-prio="${p}">${esc(L(CFG.priorities[p]))}<small>${ui('hint_' + p)}</small></button>`).join('') + `</div>`;
+  }
+  if (st.err) h += `<div class="err">${esc(st.err)}</div>`;
+  return h;
+}
+
+const ICON = { urgent: '🔴', today: '🟠', info: '🟢' };
+function screenPreview() {
+  const t = tplById(st.tpl), dir = direction(), p = payload();
+  let s = '';
+  if (dir !== 'forum') s += `${ICON[st.prio]} ${L(CFG.priorities[st.prio])} · `;
+  s += `${L(t.name)}\n`;
+  if (st.fields.subject) s += `${st.fields.subject}\n`;
+  s += '\n';
+  for (const f of t.fields) {
+    if (f.id === 'subject' || f.type === 'checkbox') continue;
+    let v = st.fields[f.id]; if (!v) continue;
+    if (f.type === 'select') v = L((f.options.find(o => o.id === v) || {}));
+    s += f.type === 'textarea' ? `${L(f)}\n${v}\n` : `${L(f)}: ${v}\n`;
+  }
+  const n = bytes(), over = n > MAX_BYTES;
+  let h = `<h2>${ui('preview')}</h2><div class="preview">${esc(s)}</div>`;
+  h += `<div class="meta">${ui('size')}: ${n} / ${MAX_BYTES} <span class="${over ? 'err' : 'ok'}">${over ? '✖' : '✔'}</span></div>`;
+  if (over) h += `<div class="err">${ui('too_long')}</div>`;
+  if (!tg) h += `<div class="meta">${ui('test_mode')}</div><pre>${esc(JSON.stringify(p, null, 1))}</pre>`;
+  return h;
+}
+
+/* ---------- validation per step ---------- */
+function checkForm() {
+  const t = tplById(st.tpl);
+  if (t.direction === 'any' && !st.dir) return ui('direction');
+  for (const f of t.fields) if (f.required && !(st.fields[f.id] || '').trim()) return ui('fill') + L(f);
+  return '';
+}
+function checkAudience() { return st.roles.length ? '' : ui('pick_role'); }
+
+function defaultRoles() {
+  const dir = direction();
+  if (dir === 'down') return CFG.roles.filter(r => r.level > myLevel()).map(r => r.id);
+  const higher = CFG.roles.filter(r => r.level < myLevel() && r.id !== 'officer');
+  return higher.length ? [higher[higher.length - 1].id] : [];       // nearest superior
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'l-en' || b.id === 'l-am') { lang = b.id.slice(2); return draw(); }
+  if (b.dataset.tpl) {
+    st = { ...st, step: 2, tpl: b.dataset.tpl, fields: {}, dir: null, err: '', roles: [] };
+    const t = tplById(st.tpl);
+    if (t.direction === 'any') st.dir = myLevel() > 1 ? 'up' : 'down';
+    st.scope = me.all ? 'all' : (me.role === 'dean' ? 'college' : 'dept');
+    st.prio = 'today'; return draw();
+  }
+  if (b.dataset.dir) { st.dir = b.dataset.dir; st.roles = []; return draw(); }
+  if (b.dataset.scope) { st.scope = b.dataset.scope; return draw(); }
+  if (b.dataset.prio) { st.prio = b.dataset.prio; return draw(); }
+  const act = b.dataset.act;
+  if (act === 'back') { st.err = ''; st.step = (direction() === 'forum' && st.step === 4) ? 2 : st.step - 1; return draw(); }
+  if (act === 'next') {
+    if (st.step === 2) {
+      st.err = checkForm(); if (st.err) return draw();
+      if (!st.roles.length) st.roles = defaultRoles();
+      st.step = direction() === 'forum' ? 4 : 3; return draw();
+    }
+    if (st.step === 3) { st.err = checkAudience(); if (st.err) return draw(); st.step = 4; return draw(); }
+  }
+  if (act === 'send') {
+    const data = JSON.stringify(payload());
+    if (tg) tg.sendData(data); else { st.err = ''; draw(); }
+  }
+});
+
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.f) st.fields[t.dataset.f] = t.type === 'checkbox' ? (t.checked ? '1' : '') : t.value;
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.dataset.f && t.type === 'checkbox') st.fields[t.dataset.f] = t.checked ? '1' : '';
+  if (t.dataset.role) st.roles = t.checked ? [...new Set([...st.roles, t.dataset.role])] : st.roles.filter(r => r !== t.dataset.role);
+  if ('college' in t.dataset) { st.college = t.value; const u = CFG.units.find(x => x.id === st.college); st.dept = u.depts[0].id; draw(); }
+  if ('dept' in t.dataset) st.dept = t.value;
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,632 @@
+{
+  "roles": [
+    {
+      "id": "vp",
+      "level": 1,
+      "en": "Vice President",
+      "am": "ምክትል ፕሬዝዳንት"
+    },
+    {
+      "id": "dean",
+      "level": 2,
+      "en": "Dean / Director",
+      "am": "ዲን / ዳይሬክተር"
+    },
+    {
+      "id": "head",
+      "level": 3,
+      "en": "Department Head",
+      "am": "የትምህርት ክፍል ኃላፊ"
+    },
+    {
+      "id": "officer",
+      "level": 4,
+      "en": "Officer / Coordinator",
+      "am": "ኦፊሰር / አስተባባሪ"
+    },
+    {
+      "id": "staff",
+      "level": 5,
+      "en": "Staff",
+      "am": "ሠራተኛ"
+    }
+  ],
+  "units": [
+    {
+      "id": "cbtve",
+      "en": "College of Business, Technology and Vocational Education",
+      "am": "የቢዝነስ፣ ቴክኖሎጂና ሙያ ትምህርት ኮሌጅ",
+      "depts": [
+        {
+          "id": "mkt_econ",
+          "en": "Marketing and Economics",
+          "am": "ማርኬቲንግና ኢኮኖሚክስ"
+        },
+        {
+          "id": "acc_mkt",
+          "en": "Accounting and Marketing",
+          "am": "አካውንቲንግና ማርኬቲንግ"
+        },
+        {
+          "id": "cte",
+          "en": "Construction Technology Education (CTE)",
+          "am": "የግንባታ ቴክኖሎጂ ትምህርት"
+        },
+        {
+          "id": "agri",
+          "en": "Agriculture Education",
+          "am": "የግብርና ትምህርት"
+        },
+        {
+          "id": "mfg",
+          "en": "Manufacturing Education",
+          "am": "የማምረቻ ትምህርት"
+        }
+      ]
+    },
+    {
+      "id": "college_b",
+      "en": "College B (edit me)",
+      "am": "ኮሌጅ ለ (አስተካክሉኝ)",
+      "depts": [
+        {
+          "id": "b_dept1",
+          "en": "Department 1 (edit me)",
+          "am": "ክፍል 1 (አስተካክሉኝ)"
+        }
+      ]
+    },
+    {
+      "id": "central",
+      "en": "Central offices (VPOs, directorates)",
+      "am": "ማዕከላዊ ጽ/ቤቶች (ም/ፕሬዝዳንት ጽ/ቤቶች፣ ዳይሬክቶሬቶች)",
+      "depts": [
+        {
+          "id": "ug_pg",
+          "en": "UG and PG Office",
+          "am": "የመጀመሪያና ድህረ ምረቃ ጽ/ቤት"
+        },
+        {
+          "id": "ict",
+          "en": "ICT Directorate",
+          "am": "የአይሲቲ ዳይሬክቶሬት"
+        }
+      ]
+    }
+  ],
+  "priorities": {
+    "urgent": {
+      "en": "IMMEDIATE",
+      "am": "አስቸኳይ"
+    },
+    "today": {
+      "en": "TODAY",
+      "am": "ዛሬ"
+    },
+    "info": {
+      "en": "FOR INFORMATION",
+      "am": "ለመረጃ"
+    }
+  },
+  "templates": [
+    {
+      "id": "announcement",
+      "group": "down",
+      "direction": "down",
+      "name": {
+        "en": "Announcement",
+        "am": "ማስታወቂያ"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Subject",
+          "am": "ጉዳዩ"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "required": true,
+          "max": 1200,
+          "en": "Announcement text",
+          "am": "የማስታወቂያው ጽሑፍ"
+        },
+        {
+          "id": "effective",
+          "type": "date",
+          "en": "Effective date",
+          "am": "የሚጀምርበት ቀን"
+        },
+        {
+          "id": "body_alt",
+          "type": "textarea",
+          "max": 1200,
+          "en": "Translation (optional)",
+          "am": "ትርጉም (አማራጭ)"
+        }
+      ]
+    },
+    {
+      "id": "meeting",
+      "group": "down",
+      "direction": "down",
+      "name": {
+        "en": "Meeting call",
+        "am": "የስብሰባ ጥሪ"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Meeting title",
+          "am": "የስብሰባው ርዕስ"
+        },
+        {
+          "id": "agenda",
+          "type": "textarea",
+          "required": true,
+          "max": 900,
+          "en": "Agenda",
+          "am": "አጀንዳ"
+        },
+        {
+          "id": "date",
+          "type": "date",
+          "required": true,
+          "en": "Date",
+          "am": "ቀን"
+        },
+        {
+          "id": "time",
+          "type": "time",
+          "required": true,
+          "en": "Time",
+          "am": "ሰዓት"
+        },
+        {
+          "id": "place",
+          "type": "text",
+          "required": true,
+          "max": 120,
+          "en": "Place",
+          "am": "ቦታ"
+        },
+        {
+          "id": "attend",
+          "type": "select",
+          "en": "Attendance",
+          "am": "መገኘት",
+          "options": [
+            {
+              "id": "must",
+              "en": "Compulsory",
+              "am": "ግዴታ"
+            },
+            {
+              "id": "invited",
+              "en": "Invited",
+              "am": "ግብዣ"
+            }
+          ]
+        },
+        {
+          "id": "body_alt",
+          "type": "textarea",
+          "max": 900,
+          "en": "Translation (optional)",
+          "am": "ትርጉም (አማራጭ)"
+        }
+      ]
+    },
+    {
+      "id": "schedule_change",
+      "group": "down",
+      "direction": "down",
+      "name": {
+        "en": "Schedule / room change",
+        "am": "የፕሮግራም / የአዳራሽ ለውጥ"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Subject",
+          "am": "ጉዳዩ"
+        },
+        {
+          "id": "course",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Course / activity",
+          "am": "ኮርስ / እንቅስቃሴ"
+        },
+        {
+          "id": "old",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Old date / time / room",
+          "am": "የቀድሞ ቀን / ሰዓት / ቦታ"
+        },
+        {
+          "id": "new",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "New date / time / room",
+          "am": "አዲስ ቀን / ሰዓት / ቦታ"
+        },
+        {
+          "id": "note",
+          "type": "textarea",
+          "max": 600,
+          "en": "Note",
+          "am": "ማስታወሻ"
+        }
+      ]
+    },
+    {
+      "id": "data_request",
+      "group": "down",
+      "direction": "down",
+      "name": {
+        "en": "Request for data / list",
+        "am": "የመረጃ / ዝርዝር ጥያቄ"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Subject",
+          "am": "ጉዳዩ"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "required": true,
+          "max": 900,
+          "en": "What must be submitted",
+          "am": "መቅረብ ያለበት መረጃ"
+        },
+        {
+          "id": "format",
+          "type": "text",
+          "max": 300,
+          "en": "Format or form link",
+          "am": "ቅርጸት ወይም የቅጽ አገናኝ"
+        },
+        {
+          "id": "deadline",
+          "type": "date",
+          "required": true,
+          "en": "Deadline (date)",
+          "am": "ቀነ ገደብ (ቀን)"
+        },
+        {
+          "id": "deadline_time",
+          "type": "time",
+          "en": "Deadline (time)",
+          "am": "ቀነ ገደብ (ሰዓት)"
+        },
+        {
+          "id": "body_alt",
+          "type": "textarea",
+          "max": 900,
+          "en": "Translation (optional)",
+          "am": "ትርጉም (አማራጭ)"
+        }
+      ]
+    },
+    {
+      "id": "request",
+      "group": "up",
+      "direction": "any",
+      "name": {
+        "en": "Request / action needed",
+        "am": "ጥያቄ / ተግባር"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Subject",
+          "am": "ጉዳዩ"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "required": true,
+          "max": 1200,
+          "en": "What is needed",
+          "am": "የሚፈለገው ነገር"
+        },
+        {
+          "id": "deadline",
+          "type": "date",
+          "en": "Deadline",
+          "am": "ቀነ ገደብ"
+        },
+        {
+          "id": "body_alt",
+          "type": "textarea",
+          "max": 1200,
+          "en": "Translation (optional)",
+          "am": "ትርጉም (አማራጭ)"
+        }
+      ]
+    },
+    {
+      "id": "report",
+      "group": "up",
+      "direction": "up",
+      "name": {
+        "en": "Report",
+        "am": "ሪፖርት"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Report title",
+          "am": "የሪፖርቱ ርዕስ"
+        },
+        {
+          "id": "period",
+          "type": "text",
+          "max": 100,
+          "en": "Period covered",
+          "am": "የሪፖርቱ ወቅት"
+        },
+        {
+          "id": "summary",
+          "type": "textarea",
+          "required": true,
+          "max": 1200,
+          "en": "Summary",
+          "am": "ማጠቃለያ"
+        },
+        {
+          "id": "issues",
+          "type": "textarea",
+          "max": 800,
+          "en": "Challenges and support needed",
+          "am": "ተግዳሮቶችና የሚያስፈልግ ድጋፍ"
+        }
+      ]
+    },
+    {
+      "id": "letter",
+      "group": "letter",
+      "direction": "any",
+      "name": {
+        "en": "Official letter",
+        "am": "ኦፊሴላዊ ደብዳቤ"
+      },
+      "fields": [
+        {
+          "id": "date",
+          "type": "date",
+          "required": true,
+          "en": "Date",
+          "am": "ቀን"
+        },
+        {
+          "id": "to",
+          "type": "text",
+          "required": true,
+          "max": 200,
+          "en": "To (title / office)",
+          "am": "ለ (ማዕረግ / ጽ/ቤት)"
+        },
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 200,
+          "en": "Subject",
+          "am": "ጉዳዩ"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "required": true,
+          "max": 1400,
+          "en": "Letter text",
+          "am": "የደብዳቤው ጽሑፍ"
+        },
+        {
+          "id": "cc",
+          "type": "text",
+          "max": 300,
+          "en": "CC",
+          "am": "ግልባጭ"
+        },
+        {
+          "id": "signatory",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Signed by (name / position)",
+          "am": "ፈራሚ (ስም / ኃላፊነት)"
+        }
+      ]
+    },
+    {
+      "id": "opinion",
+      "group": "forum",
+      "direction": "forum",
+      "name": {
+        "en": "Staff forum post",
+        "am": "የሠራተኞች መድረክ"
+      },
+      "fields": [
+        {
+          "id": "subject",
+          "type": "text",
+          "required": true,
+          "max": 150,
+          "en": "Topic",
+          "am": "ርዕስ"
+        },
+        {
+          "id": "body",
+          "type": "textarea",
+          "required": true,
+          "max": 1200,
+          "en": "Your opinion or suggestion",
+          "am": "አስተያየትዎ ወይም ጥቆማዎ"
+        },
+        {
+          "id": "anon",
+          "type": "checkbox",
+          "en": "Post without my name",
+          "am": "ስሜ ሳይጠቀስ ይለጠፍ"
+        }
+      ]
+    }
+  ],
+  "ui": {
+    "app_title": {
+      "en": "Communication Hub",
+      "am": "የመገናኛ ማዕከል"
+    },
+    "pick": {
+      "en": "What do you want to send?",
+      "am": "ምን መላክ ይፈልጋሉ?"
+    },
+    "group_down": {
+      "en": "Notices to staff below",
+      "am": "ወደ በታች የሚላኩ ማሳሰቢያዎች"
+    },
+    "group_up": {
+      "en": "Requests and reports",
+      "am": "ጥያቄና ሪፖርት"
+    },
+    "group_letter": {
+      "en": "Letters",
+      "am": "ደብዳቤዎች"
+    },
+    "group_forum": {
+      "en": "Staff forum",
+      "am": "የሠራተኞች መድረክ"
+    },
+    "no_perm": {
+      "en": "Needs permission from the administrator",
+      "am": "ከአስተዳዳሪው ፈቃድ ያስፈልጋል"
+    },
+    "direction": {
+      "en": "Direction",
+      "am": "አቅጣጫ"
+    },
+    "dir_up": {
+      "en": "To superiors",
+      "am": "ወደ ላይ (ለበላይ ኃላፊዎች)"
+    },
+    "dir_down": {
+      "en": "To staff below",
+      "am": "ወደ ታች (ለበታች ሠራተኞች)"
+    },
+    "audience": {
+      "en": "Who should receive it?",
+      "am": "ለማን ይድረስ?"
+    },
+    "scope": {
+      "en": "Scope",
+      "am": "ወሰን"
+    },
+    "scope_all": {
+      "en": "Whole university",
+      "am": "መላው ዩኒቨርሲቲ"
+    },
+    "scope_college": {
+      "en": "One college / office group",
+      "am": "አንድ ኮሌጅ / ጽ/ቤት ቡድን"
+    },
+    "scope_dept": {
+      "en": "One department",
+      "am": "አንድ የትምህርት ክፍል"
+    },
+    "college": {
+      "en": "College",
+      "am": "ኮሌጅ"
+    },
+    "dept": {
+      "en": "Department",
+      "am": "የትምህርት ክፍል"
+    },
+    "roles": {
+      "en": "Recipients (by role)",
+      "am": "ተቀባዮች (በሥራ ደረጃ)"
+    },
+    "priority": {
+      "en": "Urgency",
+      "am": "አጣዳፊነት"
+    },
+    "hint_urgent": {
+      "en": "Delivered now, with alert",
+      "am": "ወዲያውኑ በማንቂያ ይላካል"
+    },
+    "hint_today": {
+      "en": "Delivered now, silently",
+      "am": "አሁን ያለ ድምፅ ይላካል"
+    },
+    "hint_info": {
+      "en": "Goes into the daily morning digest",
+      "am": "በየቀኑ ጠዋት በሚላከው ማጠቃለያ ውስጥ ይካተታል"
+    },
+    "preview": {
+      "en": "Preview",
+      "am": "ቅድመ እይታ"
+    },
+    "send": {
+      "en": "Send",
+      "am": "ላክ"
+    },
+    "next": {
+      "en": "Next",
+      "am": "ቀጥል"
+    },
+    "back": {
+      "en": "Back",
+      "am": "ተመለስ"
+    },
+    "size": {
+      "en": "Size",
+      "am": "መጠን"
+    },
+    "too_long": {
+      "en": "Too long for one message. Shorten it, then attach longer text as a file after sending.",
+      "am": "መልዕክቱ ለአንድ መላኪያ በጣም ረጅም ነው። ያሳጥሩት፤ ረጅም ጽሑፍ ከላኩ በኋላ በፋይል ያያይዙ።"
+    },
+    "fill": {
+      "en": "Please fill in: ",
+      "am": "እባክዎ ይሙሉ፦ "
+    },
+    "pick_role": {
+      "en": "Choose at least one recipient role",
+      "am": "ቢያንስ አንድ የተቀባይ የሥራ ደረጃ ይምረጡ"
+    },
+    "attach_note": {
+      "en": "After sending, the bot will let you attach files.",
+      "am": "ከላኩ በኋላ ቦቱ ፋይሎችን እንዲያያይዙ ያስችልዎታል።"
+    },
+    "test_mode": {
+      "en": "Test mode (outside Telegram): data shown below",
+      "am": "የሙከራ ሁነታ (ከቴሌግራም ውጭ)፦ መረጃው ከታች ይታያል"
+    }
+  }
+}
